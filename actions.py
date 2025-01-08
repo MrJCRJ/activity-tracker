@@ -1,6 +1,7 @@
 # Contém as funções para registrar, editar, deletar e exibir atividades.
 from storage import carregar_dados, salvar_dados
 from datetime import datetime
+from utils import calcular_horas_por_data
 
 # Função para validar data e hora
 def validate_datetime(input_str, date_time_type):
@@ -169,3 +170,17 @@ def deletar_atividade():
             print("Número de atividade inválido.")
     except ValueError:
         print("Entrada inválida! Certifique-se de digitar um número válido para o índice da atividade.")
+
+# Função para calcular o total de horas por data
+def exibir_estatisticas():
+    dados = carregar_dados()
+    if not dados:
+        print("Nenhuma atividade registrada para exibir estatísticas.")
+        return
+
+    horas_por_data = calcular_horas_por_data(dados)
+
+    print("\n=== Estatísticas por Data ===")
+    for data, horas in sorted(horas_por_data.items()):
+        print(f"{data}: {horas:.2f} horas")
+    print("=============================\n")
