@@ -116,19 +116,28 @@ def editar_atividade():
 
     except ValueError:
         print("Entrada inválida! Certifique-se de digitar um número válido para o índice da atividade.")
+
 # Função para deletar uma atividade
 def deletar_atividade():
     exibir_atividades()
     dados = carregar_dados()
     if not dados:
+        print("Não há atividades registradas.")
         return
 
-    indice = int(input("Digite o número da atividade que deseja deletar: ")) - 1
-    if 0 <= indice < len(dados):
-        confirmacao = input(f"Tem certeza que deseja deletar a atividade '{dados[indice]['descricao']}'? (s/n): ")
-        if confirmacao.lower() == 's':
-            del dados[indice]
-            salvar_dados(dados)
-            print("Atividade deletada com sucesso!")
-    else:
-        print("Número de atividade inválido.")
+    try:
+        indice = int(input("Digite o número da atividade que deseja deletar: ")) - 1
+        if 0 <= indice < len(dados):
+            print(f"Você está prestes a deletar a seguinte atividade:")
+            print(f"Data: {dados[indice]['data']}, Início: {dados[indice]['hora_inicio']}, Fim: {dados[indice]['hora_fim']}")
+            confirmacao = input("Tem certeza que deseja deletar? (s/n): ").lower()
+            if confirmacao == 's':
+                dados.pop(indice)
+                salvar_dados(dados)
+                print("Atividade deletada com sucesso!")
+            else:
+                print("Deleção cancelada.")
+        else:
+            print("Número de atividade inválido.")
+    except ValueError:
+        print("Entrada inválida! Certifique-se de digitar um número válido para o índice da atividade.")
