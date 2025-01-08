@@ -51,6 +51,34 @@ def registrar_atividade():
     salvar_dados(dados)
     print("Atividade registrada com sucesso!")
 
+
+# Filtro por data
+def filtrar_por_data(dados, data):
+    atividades_filtradas = [atividade for atividade in dados if atividade['data'] == data]
+    return atividades_filtradas
+
+# Exibir atividades filtradas por data
+def exibir_atividades_por_data():
+    dados = carregar_dados()
+    if not dados:
+        print("Não há atividades registradas.")
+        return
+    
+    # Ordena as atividades pela data e hora de início
+    dados.sort(key=lambda x: (x["data"], x["hora_inicio"]))
+
+    data = input("Digite a data desejada (formato: AAAA-MM-DD): ")
+
+    atividades_filtradas = filtrar_por_data(dados, data)
+
+    if atividades_filtradas:
+        print(f"Atividades na data {data}:")
+        for atividade in atividades_filtradas:
+            print(f"{atividade['hora_inicio']} - {atividade['hora_fim']} | {atividade['descricao']}")
+    else:
+        print(f"Não foram encontradas atividades para a data {data}.")
+
+
 # Função para exibir todas as atividades registradas
 def exibir_atividades():
     
