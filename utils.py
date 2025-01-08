@@ -5,13 +5,15 @@
 
 
 from datetime import datetime
+from collections import defaultdict
 
-# Função para calcular o total de horas por data
-def calcular_horas_por_data(dados):
-    horas_por_data = {}
+# Função para calcular horas totais por data e agrupar tarefas por descrição
+def calcular_horas_por_data_e_tarefa(dados):
+    estatisticas = defaultdict(lambda: defaultdict(float))  # Estrutura: {data: {descricao: horas}}
 
     for atividade in dados:
         data = atividade["data"]
+        descricao = atividade["descricao"]
         hora_inicio = atividade["hora_inicio"]
         hora_fim = atividade["hora_fim"]
 
@@ -19,13 +21,10 @@ def calcular_horas_por_data(dados):
         inicio = datetime.strptime(hora_inicio, "%H:%M")
         fim = datetime.strptime(hora_fim, "%H:%M")
 
-        # Calcula a diferença em horas
+        # Calcula a duração em horas
         duracao = (fim - inicio).seconds / 3600
 
-        # Soma a duração ao total da data
-        if data in horas_por_data:
-            horas_por_data[data] += duracao
-        else:
-            horas_por_data[data] = duracao
+        # Adiciona a duração à descrição dentro da data
+        estatisticas[data][descricao] += duracao
 
-    return horas_por_data
+    return estatisticas

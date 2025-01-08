@@ -1,5 +1,5 @@
 # Arquivo principal que inicia o programa e controla o menu.
-from actions import registrar_atividade, exibir_atividades, editar_atividade, deletar_atividade, exibir_atividades_por_data, exibir_estatisticas
+from actions import registrar_atividade, exibir_atividades, editar_atividade, deletar_atividade, exibir_atividades_por_data, exibir_estatisticas_por_tarefa
 from storage import carregar_dados
 
 def menu():
@@ -22,7 +22,7 @@ def menu():
         elif opcao == "4":
             deletar_atividade()
         elif opcao == "5":
-            exibir_estatisticas()
+            exibir_estatisticas_por_tarefa()
         elif opcao == "6":
             print("Saindo...")
             break
