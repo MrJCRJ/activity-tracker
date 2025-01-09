@@ -1,58 +1,63 @@
-# Arquivo principal que inicia o programa e controla o menu.
-from actions import registrar_atividade, exibir_atividades, editar_atividade, deletar_atividade, exibir_atividades_por_data, exibir_estatisticas_por_tarefa
+from InquirerPy import prompt
+from actions import registrar_atividade, editar_atividade, deletar_atividade, exibir_atividades, exibir_atividades_por_data, exibir_estatisticas_por_tarefa
 from storage import carregar_dados
 
-def menu():
+def menu_principal():
     while True:
-        print("\n=== Menu ===")
-        print("1. Registrar nova atividade")
-        print("2. Exibir atividades")
-        print("3. Editar atividade")
-        print("4. Deletar atividade")
-        print("5. Exibir estatísticas")
-        print("6. Sair")
-        opcao = input("Escolha uma opção: ")
+        # Menu principal
+        menu_options = {
+            "Registrar nova atividade": registrar_atividade,
+            "Exibir atividades": submenu_exibir_atividades,
+            "Editar atividade": editar_atividade,
+            "Deletar atividade": deletar_atividade,
+            "Exibir estatísticas": exibir_estatisticas_por_tarefa,
+            "Sair": None,
+        }
 
-        if opcao == "1":
-            registrar_atividade()
-        elif opcao == "2":
-            submenu_exibir_atividades()
-        elif opcao == "3":
-            editar_atividade()
-        elif opcao == "4":
-            deletar_atividade()
-        elif opcao == "5":
-            exibir_estatisticas_por_tarefa()
-        elif opcao == "6":
-            print("Saindo...")
+        question = [
+            {
+                "type": "list",
+                "name": "menu_choice",
+                "message": "Escolha uma opção:",
+                "choices": list(menu_options.keys()),
+            }
+        ]
+
+        answer = prompt(question)["menu_choice"]
+        if answer == "Sair":
+            print("Saindo do programa. Até logo!")
             break
-        else:
-            print("Opção inválida. Tente novamente.")
 
-# Submenu para exibir atividades
+        # Executa a função correspondente à opção escolhida
+        action = menu_options.get(answer)
+        if action:
+            action()
+
 def submenu_exibir_atividades():
     dados = carregar_dados()
     if not dados:
-        print("Não há atividades registradas.")
+        print("Nenhuma atividade registrada.")
         return
 
-    while True:
-        print("\n=== Exibir Atividades ===")
-        print("1. Exibir todas as atividades")
-        print("2. Filtrar atividades por data")
-        print("0. Voltar ao menu principal")
-        
-        opcao = input("Escolha uma opção: ")
+    # Submenu para exibição de atividades
+    question = [
+        {
+            "type": "list",
+            "name": "submenu_choice",
+            "message": "Escolha como exibir as atividades:",
+            "choices": [
+                "Exibir todas as atividades",
+                "Filtrar atividades por data",
+                "Voltar ao menu principal",
+            ],
+        }
+    ]
 
-        if opcao == "1":
-            exibir_atividades()
-        elif opcao == "2":
-            exibir_atividades_por_data()
-        elif opcao == "0":
-            break
-        else:
-            print("Opção inválida! Tente novamente.")
-
+    answer = prompt(question)["submenu_choice"]
+    if answer == "Exibir todas as atividades":
+        exibir_atividades()
+    elif answer == "Filtrar atividades por data":
+        exibir_atividades_por_data()
 
 if __name__ == "__main__":
-    menu()
+    menu_principal()
