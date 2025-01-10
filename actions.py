@@ -2,48 +2,88 @@
 from storage import carregar_dados, salvar_dados
 from datetime import datetime
 from utils import calcular_horas_por_data_e_tarefa
+from InquirerPy import prompt
 
 # Função para validar data e hora
-def validate_datetime(input_str, date_time_type):
+def validate_datetime(valor, tipo):
     try:
-        if date_time_type == 'data':
-            # Tenta converter a data (AAAA-MM-DD)
-            return datetime.strptime(input_str, "%Y-%m-%d").date()
-        elif date_time_type == 'hora':
-            # Tenta converter a hora (HH:MM)
-            return datetime.strptime(input_str, "%H:%M").time()
+        if tipo == 'data':
+            datetime.strptime(valor, "%Y-%m-%d")  # Valida a data no formato AAAA-MM-DD
+        elif tipo == 'hora':
+            if len(valor) == 4 and valor.isdigit():  # Verifica se a hora está no formato HHMM
+                hora = int(valor[:2])
+                minuto = int(valor[2:])
+                if 0 <= hora <= 23 and 0 <= minuto <= 59:
+                    return True
+            return False
     except ValueError:
-        print(f"{input_str} é inválido! Use o formato correto para {date_time_type}.")
-        return None
+        return False
+    return True
 
 # Função para registrar uma nova atividade
 def registrar_atividade():
-    data = input("Data (formato: AAAA-MM-DD): ")
-    # Valida a data
-    data_validada = validate_datetime(data, 'data')
+    # Sugestão de data e hora atual para facilitar o preenchimento
+    data_atual = datetime.now().strftime('%Y-%m-%d')
+    hora_atual = datetime.now().strftime('%H%M')  # Hora no formato HHMM, sem ":".
+
+    # Lista de descrições sugeridas
+    descricoes_sugeridas = [
+        "Trabalho Padaria",
+        "Projeto Activity Tracker",
+        "Faxina da Casa",
+        "Treino Iniciante de Calistenia",
+    ]
+
+    # Usando o InquirerPy para solicitar os dados
+    perguntas = [
+        {
+            'type': 'input',
+            'name': 'data',
+            'message': f"Data (formato: AAAA-MM-DD) [Sugestão: {data_atual}]:",
+            'default': data_atual
+        },
+        {
+            'type': 'input',
+            'name': 'hora_inicio',
+            'message': f"Hora de início (formato: HHMM):",
+        },
+        {
+            'type': 'input',
+            'name': 'hora_fim',
+            'message': "Hora de fim (formato: HHMM):"
+        },
+        {
+            'type': 'list',
+            'name': 'descricao',
+            'message': "Escolha uma descrição ou digite uma nova:",
+            'choices': descricoes_sugeridas
+        }
+    ]
+
+    respostas = prompt(perguntas)
+
+    # Validar data e horas
+    data_validada = validate_datetime(respostas['data'], 'data')
     if not data_validada:
+        print("Data inválida. Tente novamente.")
         return
-    
-    hora_inicio = input("Hora de início (formato: HH:MM): ")
-    # Valida a hora de início
-    hora_inicio_validada = validate_datetime(hora_inicio, 'hora')
+
+    hora_inicio_validada = validate_datetime(respostas['hora_inicio'], 'hora')  # Não precisa de ':' aqui
     if not hora_inicio_validada:
+        print("Hora de início inválida. Tente novamente.")
         return
-    
-    hora_fim = input("Hora de fim (formato: HH:MM): ")
-    # Valida a hora de fim
-    hora_fim_validada = validate_datetime(hora_fim, 'hora')
+
+    hora_fim_validada = validate_datetime(respostas['hora_fim'], 'hora')  # Não precisa de ':' aqui
     if not hora_fim_validada:
+        print("Hora de fim inválida. Tente novamente.")
         return
-    
-    descricao = input("Descrição da atividade: ")
 
     # Cria o dicionário da atividade com os dados validados
     atividade = {
-        "data": data,
-        "hora_inicio": hora_inicio,
-        "hora_fim": hora_fim,
-        "descricao": descricao,
+        "data": respostas['data'],
+        "hora_inicio": respostas['hora_inicio'][:2] + ':' + respostas['hora_inicio'][2:],  # Converte para HH:MM
+        "hora_fim": respostas['hora_fim'][:2] + ':' + respostas['hora_fim'][2:],  # Converte para HH:MM
+        "descricao": respostas['descricao'],
     }
 
     # Carrega e salva os dados
@@ -51,7 +91,6 @@ def registrar_atividade():
     dados.append(atividade)
     salvar_dados(dados)
     print("Atividade registrada com sucesso!")
-
 
 # Filtro por data
 def filtrar_por_data(dados, data):
