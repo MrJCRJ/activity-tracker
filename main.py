@@ -1,10 +1,18 @@
+# main.py: Arquivo principal do programa
+from actions.registro import registrar_atividade
+from actions.exibicao import exibir_atividades, exibir_atividades_por_data
+from actions.edicao import editar_atividade
+from actions.delecao import deletar_atividade
+from actions.estatisticas import exibir_estatisticas_por_tarefa
 from InquirerPy import prompt
-from actions import registrar_atividade, editar_atividade, deletar_atividade, exibir_atividades, exibir_atividades_por_data, exibir_estatisticas_por_tarefa
 from storage import carregar_dados
 
 def menu_principal():
+    """
+    Exibe o menu principal e gerencia a execução das opções.
+    """
     while True:
-        # Menu principal
+        # Mapeamento de opções do menu para funções
         menu_options = {
             "Registrar nova atividade": registrar_atividade,
             "Exibir atividades": submenu_exibir_atividades,
@@ -14,6 +22,7 @@ def menu_principal():
             "Sair": None,
         }
 
+        # Pergunta do menu principal
         question = [
             {
                 "type": "list",
@@ -23,17 +32,23 @@ def menu_principal():
             }
         ]
 
+        # Captura a escolha do usuário
         answer = prompt(question)["menu_choice"]
+        
         if answer == "Sair":
             print("Saindo do programa. Até logo!")
             break
 
-        # Executa a função correspondente à opção escolhida
+        # Executa a função correspondente à escolha do menu
         action = menu_options.get(answer)
         if action:
             action()
 
 def submenu_exibir_atividades():
+    """
+    Exibe um submenu para escolher como visualizar as atividades.
+    Caso não existam dados, retorna uma mensagem.
+    """
     dados = carregar_dados()
     if not dados:
         print("Nenhuma atividade registrada.")
@@ -53,6 +68,7 @@ def submenu_exibir_atividades():
         }
     ]
 
+    # Captura a escolha do submenu
     answer = prompt(question)["submenu_choice"]
     if answer == "Exibir todas as atividades":
         exibir_atividades()
@@ -60,4 +76,5 @@ def submenu_exibir_atividades():
         exibir_atividades_por_data()
 
 if __name__ == "__main__":
+    # Inicializa o programa chamando o menu principal
     menu_principal()

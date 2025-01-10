@@ -1,3 +1,4 @@
+# actions.py: Contém as funções para registrar, editar, deletar e exibir atividades.
 # Contém as funções para registrar, editar, deletar e exibir atividades.
 from storage import carregar_dados, salvar_dados
 from datetime import datetime
