@@ -1,0 +1,23 @@
+atividades.json
+
+# Ignorar arquivos compilados do Python
+*.pyc
+*.pyo
+__pycache__
+
+# Ignorar o diretório de ambiente virtual (se usar virtualenv ou venv)
+venv/
+env/
+
+# Ignorar arquivos de configuração de IDEs
+.idea/
+.vscode/
+
+# Ignorar arquivos de logs
+*.log
+
+# Ignorar o arquivo de banco de dados (caso use algum tipo de DB local, como SQLite)
+*.db
+
+# Ignorar o arquivo de configuração de editor
+*.swp
