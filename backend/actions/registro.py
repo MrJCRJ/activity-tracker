@@ -1,6 +1,5 @@
 from storage import carregar_dados, salvar_dados
 from flask import jsonify
-from utils import validate_datetime
 
 def registrar(data, hora_inicio, hora_fim, descricao):
     
