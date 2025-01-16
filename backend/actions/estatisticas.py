@@ -2,19 +2,17 @@ from storage import carregar_dados
 from utils import calcular_horas_por_data_e_tarefa
 from datetime import datetime, timedelta
 
-def exibir_estatisticas_por_tarefa():
+def gerar_estatisticas_por_tarefa():
     # Carrega os dados registrados pelo usuário
     dados = carregar_dados()
     if not dados:
-        print("Nenhuma atividade registrada para mostrar.")
-        return
+        return {"mensagem": "Nenhuma atividade registrada para mostrar."}
 
     # Calcula as estatísticas de horas por data e tarefa
     estatisticas = calcular_horas_por_data_e_tarefa(dados)
 
     if not estatisticas:
-        print("Nenhuma estatística disponível.")
-        return
+        return {"mensagem": "Nenhuma estatística disponível."}
 
     total_por_tarefa = {}
 
@@ -29,9 +27,9 @@ def exibir_estatisticas_por_tarefa():
     mensal = {}
     anual = {}
 
-    print("\n=== Estatísticas por Data ===")
+    resumo_por_data = {}
+
     for data in sorted(estatisticas.keys()):  # Ordena as datas em ordem crescente
-        print(f"\nData: {data}")
         tarefas = estatisticas[data]
         total_dia = 0
         ano, semana, dia_da_semana = datetime.strptime(data, "%Y-%m-%d").isocalendar()
@@ -43,8 +41,10 @@ def exibir_estatisticas_por_tarefa():
         if ano not in anual:
             anual[ano] = {}
 
+        resumo_por_data[data] = {}
+
         for descricao, horas in sorted(tarefas.items(), key=lambda x: x[1], reverse=True):  # Ordena tarefas por maior tempo
-            print(f"  - {descricao}: {formatar_horas(horas)}")
+            resumo_por_data[data][descricao] = formatar_horas(horas)
             total_dia += horas
             total_por_tarefa[descricao] = total_por_tarefa.get(descricao, 0) + horas
 
@@ -56,28 +56,9 @@ def exibir_estatisticas_por_tarefa():
 
             anual[ano][descricao] = anual[ano].get(descricao, 0) + horas
 
-        print(f"  Total do dia: {formatar_horas(total_dia)}")
+        resumo_por_data[data]["total_dia"] = formatar_horas(total_dia)
 
-    print("\n=== Resumo Semanal ===")
-    for semana, tarefas in sorted(semanal.items()):
-        print(f"\nSemana {semana}:")
-        for descricao, horas in sorted(tarefas.items(), key=lambda x: x[1], reverse=True):
-            print(f"  - {descricao}: {formatar_horas(horas)}")
-
-    print("\n=== Resumo Mensal ===")
-    for ano, semanas in mensal.items():
-        for semana, tarefas in sorted(semanas.items()):
-            print(f"\nSemana {semana}/{ano}:")
-            for descricao, horas in sorted(tarefas.items(), key=lambda x: x[1], reverse=True):
-                print(f"  - {descricao}: {formatar_horas(horas)}")
-
-    print("\n=== Resumo Anual ===")
-    for ano, tarefas in sorted(anual.items()):
-        print(f"\nAno {ano}:")
-        for descricao, horas in sorted(tarefas.items(), key=lambda x: x[1], reverse=True):
-            print(f"  - {descricao}: {formatar_horas(horas)}")
-
-    print("\n=== Dias de Procrastinação ou Férias ===")
+    dias_procrastinacao = []
     ano_atual = datetime.now().year
     dias_registrados = set(estatisticas.keys())
 
@@ -90,10 +71,13 @@ def exibir_estatisticas_por_tarefa():
         data_str = data_inicio.strftime("%Y-%m-%d")
         if data_str not in dias_registrados or sum(estatisticas.get(data_str, {}).values()) < 6:
             total_dia = sum(estatisticas.get(data_str, {}).values())
-            print(f"  - {data_str}: {formatar_horas(total_dia)}")
+            dias_procrastinacao.append({"data": data_str, "total_dia": formatar_horas(total_dia)})
         data_inicio += delta
 
-    print("=============================")
-    print("Fim das estatísticas.")
-    print("=============================")
-    return
+    return {
+        "resumo_por_data": resumo_por_data,
+        "resumo_semanal": semanal,
+        "resumo_mensal": mensal,
+        "resumo_anual": anual,
+        "dias_procrastinacao": dias_procrastinacao
+    }

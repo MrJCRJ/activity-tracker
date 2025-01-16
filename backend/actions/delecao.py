@@ -1,4 +1,4 @@
-from storage import carregar_dados, salvar_dados
+from backend.storage import carregar_dados, salvar_dados
 from actions.exibicao import exibir_atividades
 
 def deletar_atividade():

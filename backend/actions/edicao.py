@@ -1,5 +1,5 @@
-from storage import carregar_dados, salvar_dados
-from utils import validate_datetime
+from backend.storage import carregar_dados, salvar_dados
+from backend.utils import validate_datetime
 from actions.exibicao import exibir_atividades
 
 def editar_atividade():

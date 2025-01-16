@@ -1,5 +1,5 @@
-from storage import carregar_dados
-from utils import filtrar_por_data, validate_datetime
+from backend.storage import carregar_dados
+from backend.utils import filtrar_por_data, validate_datetime
 
 def exibir_atividades():
     try:

@@ -11,9 +11,11 @@ def carregar_dados():
     """
     try:
         if not DATA_FILE.exists():
-            return []
+            print("Arquivo não encontrado, retornando lista vazia.")
+            return []  # Se o arquivo não existe, retornamos uma lista vazia
         with DATA_FILE.open("r") as file:
-            return json.load(file)
+            dados = json.load(file)
+            return dados
     except (json.JSONDecodeError, IOError) as e:
         print(f"Erro ao carregar dados: {e}")
         return []
@@ -24,6 +26,7 @@ def salvar_dados(dados):
     Cria o diretório do arquivo, se necessário.
     """
     try:
+        # Verifica se o diretório existe e cria se necessário
         DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
         with DATA_FILE.open("w") as file:
             json.dump(dados, file, indent=4)
