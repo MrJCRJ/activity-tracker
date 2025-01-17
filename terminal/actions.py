@@ -6,7 +6,7 @@ import requests
 def registrar_atividade():
     data_atual = datetime.now().strftime('%Y-%m-%d')
     hora_atual = datetime.now().strftime('%H%M')
-    descricoes_sugeridas = ["Trabalho Padaria", "Projeto Activity Tracker", "Faxina da Casa", "Treino Iniciante de Calistenia"]
+    descricoes_sugeridas = ["Trabalho Padaria", "Projeto Activity Tracker", "Faxina da Casa", "Treino Iniciante de Calistenia", "Curso.dev"]
 
     perguntas = [
         {"type": "input", "name": "data", "message": f"Data (AAAA-MM-DD) [Sugestão: {data_atual}]:", "default": data_atual},
