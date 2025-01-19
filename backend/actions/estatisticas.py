@@ -2,37 +2,29 @@ from storage import carregar_dados
 from utils import calcular_horas_por_data_e_tarefa
 from datetime import datetime, timedelta
 
-def gerar_estatisticas_por_tarefa():
-    # Carrega os dados registrados pelo usuário
+def carregar_dados_e_estatisticas():
     dados = carregar_dados()
     if not dados:
-        return {"mensagem": "Nenhuma atividade registrada para mostrar."}
+        return None, {"mensagem": "Nenhuma atividade registrada para mostrar."}
 
-    # Calcula as estatísticas de horas por data e tarefa
     estatisticas = calcular_horas_por_data_e_tarefa(dados)
-
     if not estatisticas:
-        return {"mensagem": "Nenhuma estatística disponível."}
+        return None, {"mensagem": "Nenhuma estatística disponível."}
 
-    total_por_tarefa = {}
+    return estatisticas, None
 
-    # Função para formatar horas no estilo "Xh Ym"
-    def formatar_horas(horas):
-        horas_int = int(horas)
-        minutos = int((horas - horas_int) * 60)
-        return f"{horas_int}h {minutos}m"
+def formatar_horas(horas):
+    horas_int = int(horas)
+    minutos = int((horas - horas_int) * 60)
+    return f"{horas_int}h {minutos}m"
 
-    # Organiza dados por semanas, meses e anos
+def organizar_resumo_por_periodo(estatisticas):
     semanal = {}
     mensal = {}
     anual = {}
 
-    resumo_por_data = {}
-
-    for data in sorted(estatisticas.keys()):  # Ordena as datas em ordem crescente
-        tarefas = estatisticas[data]
-        total_dia = 0
-        ano, semana, dia_da_semana = datetime.strptime(data, "%Y-%m-%d").isocalendar()
+    for data, tarefas in estatisticas.items():
+        ano, semana, _ = datetime.strptime(data, "%Y-%m-%d").isocalendar()
 
         if semana not in semanal:
             semanal[semana] = {}
@@ -41,14 +33,7 @@ def gerar_estatisticas_por_tarefa():
         if ano not in anual:
             anual[ano] = {}
 
-        resumo_por_data[data] = {}
-
-        for descricao, horas in sorted(tarefas.items(), key=lambda x: x[1], reverse=True):  # Ordena tarefas por maior tempo
-            resumo_por_data[data][descricao] = formatar_horas(horas)
-            total_dia += horas
-            total_por_tarefa[descricao] = total_por_tarefa.get(descricao, 0) + horas
-
-            # Adiciona os valores aos resumos semanais, mensais e anuais
+        for descricao, horas in tarefas.items():
             semanal[semana][descricao] = semanal[semana].get(descricao, 0) + horas
             if semana not in mensal[ano]:
                 mensal[ano][semana] = {}
@@ -56,13 +41,13 @@ def gerar_estatisticas_por_tarefa():
 
             anual[ano][descricao] = anual[ano].get(descricao, 0) + horas
 
-        resumo_por_data[data]["total_dia"] = formatar_horas(total_dia)
+    return semanal, mensal, anual
 
+def calcular_dias_procrastinacao(estatisticas):
     dias_procrastinacao = []
     ano_atual = datetime.now().year
     dias_registrados = set(estatisticas.keys())
 
-    # Verifica todos os dias do ano até a data atual
     data_inicio = datetime(ano_atual, 1, 1)
     data_fim = datetime.now()
     delta = timedelta(days=1)
@@ -74,10 +59,46 @@ def gerar_estatisticas_por_tarefa():
             dias_procrastinacao.append({"data": data_str, "total_dia": formatar_horas(total_dia)})
         data_inicio += delta
 
+    return dias_procrastinacao
+
+def gerar_resumo_por_data(estatisticas):
+    resumo_por_data = {}
+    total_por_tarefa = {}
+
+    for data in sorted(estatisticas.keys()):
+        tarefas = estatisticas[data]
+        total_dia = 0
+        resumo_por_data[data] = {}
+
+        for descricao, horas in sorted(tarefas.items(), key=lambda x: x[1], reverse=True):
+            resumo_por_data[data][descricao] = formatar_horas(horas)
+            total_dia += horas
+            total_por_tarefa[descricao] = total_por_tarefa.get(descricao, 0) + horas
+
+        resumo_por_data[data]["total_dia"] = formatar_horas(total_dia)
+
+    return resumo_por_data, total_por_tarefa
+
+def gerar_estatisticas_por_tarefa():
+    estatisticas, erro = carregar_dados_e_estatisticas()
+    if erro:
+        return erro
+
+    resumo_por_data, total_por_tarefa = gerar_resumo_por_data(estatisticas)
+    semanal, mensal, anual = organizar_resumo_por_periodo(estatisticas)
+    dias_procrastinacao = calcular_dias_procrastinacao(estatisticas)
+
+    resumo_semanal = {semana: {descricao: formatar_horas(horas) for descricao, horas in tarefas.items()} for semana, tarefas in semanal.items()}
+    resumo_mensal = {ano: {semana: {descricao: formatar_horas(horas) for descricao, horas in tarefas.items()} for semana, tarefas in semanas.items()} for ano, semanas in mensal.items()}
+    resumo_anual = {ano: {descricao: formatar_horas(horas) for descricao, horas in tarefas.items()} for ano, tarefas in anual.items()}
+
+    resumo_por_data_recente = dict(sorted(resumo_por_data.items(), key=lambda x: x[0], reverse=True)[:10])
+
     return {
-        "resumo_por_data": resumo_por_data,
-        "resumo_semanal": semanal,
-        "resumo_mensal": mensal,
-        "resumo_anual": anual,
+        "total_por_tarefa": {descricao: formatar_horas(horas) for descricao, horas in total_por_tarefa.items()},
+        "resumo_por_data": resumo_por_data_recente,
+        "resumo_semanal": resumo_semanal,
+        "resumo_mensal": resumo_mensal,
+        "resumo_anual": resumo_anual,
         "dias_procrastinacao": dias_procrastinacao
     }
